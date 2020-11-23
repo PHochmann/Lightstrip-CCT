@@ -28,14 +28,23 @@ extern void output_grb(uint8_t *buffer, uint16_t bytes);
 uint8_t colors[BUFFER_SIZE];
 uint8_t current_pattern;
 
+uint16_t pressed_ms;
+
 // Button handling
 
 void button_init()
 {
+    cli();
     BUTTON_DDR &= ~(1 << BUTTON_INDEX); // Input
     BUTTON_PORT |= (1 << BUTTON_INDEX); // Pullup
-    PCICR |= 0b00000100;           // Use Port D for pin state change interrupt
-    PCMSK2 |= (1 << BUTTON_INDEX); // Bitmask for used pin
+    PCICR |= 0b00000100;                // Use Port D for pin state change interrupt
+    PCMSK2 |= (1 << BUTTON_INDEX);      // Bitmask for used pin
+    // Configure Timer 0
+    TCCR0A = (1 << WGM01);              // CTC mode
+    TCCR0B = (1 << CS02) | (1 << CS00); // 1024 prescaler
+    OCR0A = 155;                        // Timer interrupt every 100ms
+    TCNT0 = 0;
+    TIMSK0 |= (0 << OCIE0A);            // Disable timer
     sei();
 }
 
@@ -48,24 +57,36 @@ bool is_pressed()
     return false;
 }
 
+// Timer interrupt
+ISR(TIMER0_COMPA_vect)
+{
+    // Interrupt occurs every 10ms
+    pressed_ms += 10;
+}
+
+// Pin state change interrupt
 ISR(PCINT2_vect)
 {
     if (is_pressed())
     {
-        int ms_pressed = 0;
-        while (is_pressed())
-        {
-            _delay_ms(100);
-            ms_pressed += 100;
-        }
-        if (ms_pressed >= LONG_PRESS_MS)
+        // Start timer
+        TIMSK0 |= (1 << OCIE0A);
+    }
+    else
+    {
+        // Stop timer and change pattern
+        TIMSK0 |= (0 << OCIE0A);
+        if (pressed_ms >= LONG_PRESS_MS)
         {
             current_pattern = 0;
         }
         else
         {
-            current_pattern = (current_pattern + 1) % NUM_PATTERNS;
+            current_pattern++;
+            current_pattern %= NUM_PATTERNS;
         }
+        pressed_ms = 0;
+        TCNT0 = 0;
     }
 }
 
