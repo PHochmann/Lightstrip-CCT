@@ -32,7 +32,7 @@ all: $(BUILD_DIR)/$(TARGET_ELF)
 
 flash: $(BUILD_DIR)/$(TARGET_ELF)
 	avr-objcopy -O ihex $(BUILD_DIR)/$(TARGET_ELF) $(BUILD_DIR)/$(PROJ).hex
-	avrdude -v -p $(MCU_AVRDUDE) -c arduino -P $(USB_DEVICE) -b 115200 -D -U flash:w:$(BUILD_DIR)/$(PROJ).hex:i
+	avrdude -v -p $(MCU_AVRDUDE) -c arduino -P $(USB_DEVICE) -b 57600 -D -U flash:w:$(BUILD_DIR)/$(PROJ).hex:i
 
 $(BUILD_DIR)/$(TARGET_ELF): $(OBJS)
 	@$(CC) -mmcu=$(MCU_GCC) $(OBJS) -o $@ $(LDFLAGS)

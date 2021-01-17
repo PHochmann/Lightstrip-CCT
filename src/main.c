@@ -5,116 +5,45 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#define BUTTON_DDR     DDRD
-#define BUTTON_PORT    PORTD
-#define BUTTON_PIN     PIND
-#define BUTTON_INDEX   2
-#define LONG_PRESS_MS  1000
-#define WAIT_INTVAL_MS 100
+// OC2A = Port B, Pin 3 PWM COLD WHITE
+// OC2B = Port D, Pin 3 PWM WARM WHITE
+// ADC0 = Port C, Pin 0 ANALOG
+// ADC0 = Port C, Pin 1 ANALOG
 
-#define STATUS_DDR   DDRB
-#define STATUS_PORT  PORTB
-#define STATUS_INDEX 5
-
-#define LIGHTSTRIP_DDR    DDRB
-#define LIGHTSTRIP_PORT   PORTB
-#define LIGHTSTRIP_INDEX  2
-#define NUM_LEDS          118
-#define BUFFER_SIZE       (NUM_LEDS * 3)
-
-#define NUM_PATTERNS 3
-
-extern void output_grb(uint8_t *buffer, uint16_t bytes);
-uint8_t colors[BUFFER_SIZE];
-uint8_t current_pattern;
-
-// Button handling
-
-void button_init()
+void init()
 {
-    BUTTON_DDR &= ~(1 << BUTTON_INDEX); // Input
-    BUTTON_PORT |= (1 << BUTTON_INDEX); // Pullup
-    PCICR |= 0b00000100;           // Use Port D for pin state change interrupt
-    PCMSK2 |= (1 << BUTTON_INDEX); // Bitmask for used pin
-    sei();
+    // OC2A, OC2B non-inverting fast PWM, top=0xFF
+    TCCR2A = (1 << COM2A1) | (0 << COM2A0) | (1 << COM2B1) | (0 << COM2B0) | (1 << WGM21) | (1 << WGM20);
+    TCCR2B = (0 << WGM22) | (0 << CS22) | (0 << CS21) | (1 << CS20);
+    DDRD |= (1 << 3);
+    DDRB |= (1 << 3);
+    OCR2A = 10;
+    OCR2B = 0;
+
+    // Prescaler 128
+    ADCSRA = (1 << ADEN) | (0 << ADATE) | (0 << ADIE) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
+    ADMUX = (0 << REFS1) | (1 << REFS0) | (1 << ADLAR);
+    DDRC &= (0 << 0) | (0 << 1);
+    PORTC |= (1 << 0) | (1 << 1);
 }
 
-bool is_pressed()
+uint8_t get_adc_value()
 {
-    if ((~BUTTON_PIN & (1 << BUTTON_INDEX)) != 0)
-    {
-        return true;
-    }
-    return false;
-}
-
-ISR(PCINT2_vect)
-{
-    if (is_pressed())
-    {
-        int ms_pressed = 0;
-        while (is_pressed())
-        {
-            _delay_ms(100);
-            ms_pressed += 100;
-        }
-        if (ms_pressed >= LONG_PRESS_MS)
-        {
-            current_pattern = 0;
-        }
-        else
-        {
-            current_pattern = (current_pattern + 1) % NUM_PATTERNS;
-        }
-    }
-}
-
-// End button handling
-
-void lightstrip_show()
-{
-    output_grb(colors, BUFFER_SIZE);
-    LIGHTSTRIP_PORT &= ~(1 << LIGHTSTRIP_INDEX);
-    _delay_us(60);
-}
-
-void lightstrip_init()
-{
-    LIGHTSTRIP_DDR  |= (1 << LIGHTSTRIP_INDEX);
-    LIGHTSTRIP_PORT &= ~(1 << LIGHTSTRIP_INDEX);
+    //ADMUX &= 0b11110000;
+    //ADMUX |= (mux & 0b00001111);
+    ADCSRA |= (1 << ADSC); // Start
+    while ((ADCSRA & (1 << ADIF)) == 0); // Wait
+    ADCSRA &= ~(1 << ADIF); // Clear flag
+    return ADCH;
 }
 
 int main()
 {
-    STATUS_DDR |= (1 << STATUS_INDEX);   // Set debugging LED as output
-    STATUS_PORT &= ~(1 << STATUS_INDEX); // Turn LED off
-    button_init();
-    current_pattern = 0;
-    
+    init();
     while (true)
     {
-        switch (current_pattern)
-        {
-            case 0:
-                STATUS_PORT |= (1 << STATUS_INDEX);
-                _delay_ms(100);
-                STATUS_PORT &= ~(1 << STATUS_INDEX);
-                _delay_ms(100);
-                break;
-            case 1:
-                STATUS_PORT |= (1 << STATUS_INDEX);
-                _delay_ms(500);
-                STATUS_PORT &= ~(1 << STATUS_INDEX);
-                _delay_ms(500);
-                break;
-            case 2:
-                STATUS_PORT |= (1 << STATUS_INDEX);
-                _delay_ms(1000);
-                STATUS_PORT &= ~(1 << STATUS_INDEX);
-                _delay_ms(1000);
-                break;
-            default:
-                break;
-        }
+        OCR2A = get_adc_value();
+        OCR2B = get_adc_value();
     }
+    return 0;
 }
