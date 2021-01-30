@@ -4,12 +4,13 @@
 #include <util/delay.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <math.h>
 
 // OC2A = Port B, Pin 3 PWM COLD WHITE
 // OC2B = Port D, Pin 3 PWM WARM WHITE
 // ADC0 = Port C, Pin 0 ANALOG
 // ADC1 = Port C, Pin 1 ANALOG
+
+#define MIN_BRIGHTNESS 0.1
 
 void init()
 {
@@ -43,25 +44,12 @@ int main()
     init();
     while (true)
     {
-        float brightness = (float)(255 - get_adc_value(0)) / 255;
-
-        // Don't let LEDs become too dim
-        if (brightness < 0.1f)
-        {
-            static float wave_pos = 0;
-            OCR2A = fabs(sin(wave_pos)) * 100;
-            OCR2B = fabs(cos(wave_pos)) * 100;
-            wave_pos += 0.05f;
-            _delay_ms(50);
-        }
-        else
-        {
-            uint8_t hue = get_adc_value(1);
-            uint8_t cold = (hue <= 128) ? 255 : (255 - 2 * (hue + 127));
-            uint8_t warm = (hue >= 128) ? 255 : 2 * hue;
-            OCR2A = cold * brightness;
-            OCR2B = warm * brightness;   
-        }
+        float brightness = ((MIN_BRIGHTNESS - 1) / 255) * get_adc_value(0) + 1;
+        uint8_t hue = get_adc_value(1);
+        uint8_t cold = (hue <= 128) ? 255 : (255 - 2 * (hue + 127));
+        uint8_t warm = (hue >= 128) ? 255 : 2 * hue;
+        OCR2A = cold * brightness;
+        OCR2B = warm * brightness;
     }
     return 0;
 }

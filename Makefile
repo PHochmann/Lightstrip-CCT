@@ -10,7 +10,7 @@ USB_DEVICE  := /dev/ttyUSB0
 INC         := /usr/avr/include
 
 CC          := avr-gcc
-LDFLAGS     := -lm
+LDFLAGS     :=
 CFLAGS      := \
 	-O3 \
 	-MMD \
