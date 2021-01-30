@@ -4,6 +4,7 @@
 #include <util/delay.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <math.h>
 
 // OC2A = Port B, Pin 3 PWM COLD WHITE
 // OC2B = Port D, Pin 3 PWM WARM WHITE
@@ -31,8 +32,8 @@ uint8_t get_adc_value(uint8_t mux)
 {
     ADMUX &= 0b11110000;
     ADMUX |= (mux & 0b00001111);
-    ADCSRA |= (1 << ADSC); // Start
-    while ((ADCSRA & (1 << ADIF)) == 0); // Wait
+    ADCSRA |= (1 << ADSC); // Start conversion
+    while ((ADCSRA & (1 << ADIF)) == 0); // Wait until conversion has finished
     ADCSRA &= ~(1 << ADIF); // Clear flag
     return ADCH;
 }
@@ -43,12 +44,24 @@ int main()
     while (true)
     {
         float brightness = (float)(255 - get_adc_value(0)) / 255;
-        uint8_t hue = get_adc_value(1);
-        uint8_t cold = (hue <= 128) ? 255 : (255 - 2 * (hue + 127));
-        uint8_t warm = (hue >= 128) ? 255 : 2 * hue;
-        OCR2A = cold * brightness;
-        OCR2B = warm * brightness;
 
+        // Don't let LEDs become too dim
+        if (brightness < 0.1f)
+        {
+            static float wave_pos = 0;
+            OCR2A = fabs(sin(wave_pos)) * 100;
+            OCR2B = fabs(cos(wave_pos)) * 100;
+            wave_pos += 0.05f;
+            _delay_ms(50);
+        }
+        else
+        {
+            uint8_t hue = get_adc_value(1);
+            uint8_t cold = (hue <= 128) ? 255 : (255 - 2 * (hue + 127));
+            uint8_t warm = (hue >= 128) ? 255 : 2 * hue;
+            OCR2A = cold * brightness;
+            OCR2B = warm * brightness;   
+        }
     }
     return 0;
 }
