@@ -8,7 +8,7 @@
 // OC2A = Port B, Pin 3 PWM COLD WHITE
 // OC2B = Port D, Pin 3 PWM WARM WHITE
 // ADC0 = Port C, Pin 0 ANALOG
-// ADC0 = Port C, Pin 1 ANALOG
+// ADC1 = Port C, Pin 1 ANALOG
 
 void init()
 {
@@ -27,10 +27,10 @@ void init()
     PORTC |= (1 << 0) | (1 << 1);
 }
 
-uint8_t get_adc_value()
+uint8_t get_adc_value(uint8_t mux)
 {
-    //ADMUX &= 0b11110000;
-    //ADMUX |= (mux & 0b00001111);
+    ADMUX &= 0b11110000;
+    ADMUX |= (mux & 0b00001111);
     ADCSRA |= (1 << ADSC); // Start
     while ((ADCSRA & (1 << ADIF)) == 0); // Wait
     ADCSRA &= ~(1 << ADIF); // Clear flag
@@ -42,8 +42,13 @@ int main()
     init();
     while (true)
     {
-        OCR2A = get_adc_value();
-        OCR2B = get_adc_value();
+        float brightness = (float)(255 - get_adc_value(0)) / 255;
+        uint8_t hue = get_adc_value(1);
+        uint8_t cold = (hue <= 128) ? 255 : (255 - 2 * (hue + 127));
+        uint8_t warm = (hue >= 128) ? 255 : 2 * hue;
+        OCR2A = cold * brightness;
+        OCR2B = warm * brightness;
+
     }
     return 0;
 }
