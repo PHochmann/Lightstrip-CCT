@@ -1,7 +1,15 @@
+# Depending on clone, you need different baud rates:
+# 2400
+# 57600
+# 115200
+
 PROJ        := lightstrip-mcu
 TARGET_ELF  := $(PROJ).elf
 BUILD_DIR   := ./bin
-SRC_DIRS    := ./src
+SRC_DIRS    := . ../common
+
+FLASH_BAUDRATE := 115200
+LOG_BAUDRATE   := 500000
 
 MCU_AVRDUDE := m328p
 MCU_GCC     := atmega328p
@@ -32,7 +40,10 @@ all: $(BUILD_DIR)/$(TARGET_ELF)
 
 flash: $(BUILD_DIR)/$(TARGET_ELF)
 	avr-objcopy -O ihex $(BUILD_DIR)/$(TARGET_ELF) $(BUILD_DIR)/$(PROJ).hex
-	avrdude -v -p $(MCU_AVRDUDE) -c arduino -P $(USB_DEVICE) -b 57600 -D -U flash:w:$(BUILD_DIR)/$(PROJ).hex:i
+	avrdude -v -p $(MCU_AVRDUDE) -c arduino -P $(USB_DEVICE) -b $(FLASH_BAUDRATE) -D -U flash:w:$(BUILD_DIR)/$(PROJ).hex:i
+
+debug: flash
+	python ../Logger.py $(USB_DEVICE) $(LOG_BAUDRATE)
 
 $(BUILD_DIR)/$(TARGET_ELF): $(OBJS)
 	@$(CC) -mmcu=$(MCU_GCC) $(OBJS) -o $@ $(LDFLAGS)
