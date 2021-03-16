@@ -100,6 +100,7 @@ ISR (TIMER1_CAPT_vect)
                 if (curr_bit == 8)
                 {
                     buffer[tentative_head] = curr_byte;
+                    //logger_printf("d: %d\n", curr_byte);
                     curr_bit = 0;
                     tentative_head = (tentative_head + 1) % BUFFER_SIZE;
                 }
