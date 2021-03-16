@@ -2,10 +2,9 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 
-#include "../common/logger.h"
-
 #include "radio_rv.h"
 #include "../common/protocol.h"
+//#include "../common/logger.h"
 
 /*
 Timer/Counter 1 is used to capture input at Pin B0
@@ -16,7 +15,6 @@ Timer/Counter 1 is used to capture input at Pin B0
 #define TICKS_PER_PULSE ((F_CPU / PRESCALER) / (1000000 / PULSE_US)) // 6
 #define BUFFER_SIZE 100
 #define ICP1 0
-
 
 volatile size_t head;
 volatile size_t tail;
@@ -41,6 +39,7 @@ ISR (TIMER1_CAPT_vect)
     static uint8_t curr_byte = 0;
     static uint8_t curr_bit = 0;
     static uint8_t tentative_head = 0;
+    static uint8_t checksum = 0;
 
     uint16_t pulses = (float)ICR1 / TICKS_PER_PULSE + 0.5;
     TCNT1 = 0; // reset timer 1 counter
@@ -62,19 +61,13 @@ ISR (TIMER1_CAPT_vect)
             {
                 is_listening = false;
 
-                // Checksum check
-                uint8_t i = head;
-                uint8_t checksum = 0;
-                while (i != tentative_head)
-                {
-                    checksum ^= buffer[i];
-                    i = (i + 1) % BUFFER_SIZE;
-                }
-
+                // Bitwise even parity
+                // XOR over all bytes must be 0
                 if (checksum == 0)
                 {
                     head = (tentative_head - 1) % BUFFER_SIZE;
                 }
+                return;
             }
             else
             {
@@ -99,8 +92,16 @@ ISR (TIMER1_CAPT_vect)
                 curr_bit++;
                 if (curr_bit == 8)
                 {
+                    // Don't overrun the reading buffer
+                    // Don't receive any more data, stop listening
+                    if (tentative_head == tail)
+                    {
+                        is_listening = false;
+                        return;
+                    }
                     buffer[tentative_head] = curr_byte;
-                    //logger_printf("d: %d\n", curr_byte);
+                    checksum ^= curr_byte;
+                    //logger_printf("byte rcvd: %d\n", curr_byte);
                     curr_bit = 0;
                     tentative_head = (tentative_head + 1) % BUFFER_SIZE;
                 }
@@ -114,6 +115,7 @@ ISR (TIMER1_CAPT_vect)
             is_listening = true;
             curr_bit = 0;
             curr_byte = 0;
+            checksum = 0;
         }
     }
 }

@@ -1,7 +1,5 @@
-#define F_CPU 16000000L
 #include <stdbool.h>
 #include <stdint.h>
-#include <util/delay.h>
 #include <avr/io.h>
 
 #define RADIO_RV
@@ -36,6 +34,7 @@ int main()
     {
         uint8_t to_receive[2] = { 0 };
         radio_receive(to_receive, 2);
+        logger_printf("rcv: %d %d\n", to_receive[0], to_receive[1]);
         
         float brightness = ((MIN_BRIGHTNESS - 1) / 255) * to_receive[0] + 1;
         uint8_t hue = to_receive[1];

@@ -13,5 +13,5 @@ while True:
         line = ser.readline()
         print(line.decode("utf-8"), end = '')
     except:
-        print("Keyboard Interrupt")
+        print("Connection closed")
         break

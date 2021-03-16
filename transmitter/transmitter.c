@@ -46,7 +46,7 @@ int main()
         uint8_t to_send[] = { get_adc_value(0), get_adc_value(1) };
         logger_printf("tx: %d %d\n", to_send[0], to_send[1]);
         radio_send(to_send, 2);
-        _delay_ms(50);
+        _delay_ms(150);
     }
 
     return 0;
