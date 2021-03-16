@@ -2,14 +2,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include <util/delay.h>
 #include <avr/io.h>
-#include <avr/interrupt.h>
 
-#define RADIO_TX
-#include "../common/radio.h"
+#include "radio_tx.h"
 #include "../common/logger.h"
+#include "../common/protocol.h"
 
 // ADC0 = Port C, Pin 0 ANALOG
 // ADC1 = Port C, Pin 1 ANALOG
@@ -41,11 +41,19 @@ int main()
 
     logger_print("Transmitter started!\n");
 
+    /*while (true)
+    {
+        PORTD = (1 << 3);
+        _delay_us(PULSE_US * 10);
+        PORTD = 0;
+        _delay_us(PULSE_US * 55);
+    }*/
+
     while (true)
     {
-        uint8_t to_send[2] = { get_adc_value(0), get_adc_value(1) };
-        logger_printf("%d %d\n", to_send[0], to_send[1]);
-        radio_send(to_send, 2);
+        char *to_send = "Henlo, smol bean!";
+        //logger_printf("%d %d\n", to_send[0], to_send[1]);
+        radio_send((uint8_t*)to_send, strlen(to_send) + 1);
     }
 
     return 0;
