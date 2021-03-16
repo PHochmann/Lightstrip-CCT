@@ -56,4 +56,10 @@ void radio_send(uint8_t *buffer, size_t bytes)
     _delay_us(END_HIGH * PULSE_US);
     PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) & ~(1 << RADIO_TX_PIN);
     _delay_us(END_LOW * PULSE_US);
+
+    // End low pulse
+    PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) | (1 << RADIO_TX_PIN);
+    _delay_us(PULSE_US);
+    // Put into low until next transmission
+    PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) & ~(1 << RADIO_TX_PIN);
 }
