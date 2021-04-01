@@ -4,7 +4,7 @@
 
 #include "radio_rv.h"
 #include "../common/protocol.h"
-//#include "../common/logger.h"
+#include "../common/logger.h"
 
 /*
 Timer/Counter 1 is used to capture input at Pin B0
@@ -41,7 +41,7 @@ ISR (TIMER1_CAPT_vect)
     static uint8_t tentative_head = 0;
     static uint8_t checksum = 0;
 
-    uint16_t pulses = (float)ICR1 / TICKS_PER_PULSE + 0.5;
+    uint16_t pulses = ((double)ICR1 / TICKS_PER_PULSE) + 0.5;
     TCNT1 = 0; // reset timer 1 counter
     TCCR1B ^= (1 << ICES1); // Toggle edge detection
 
@@ -52,6 +52,7 @@ ISR (TIMER1_CAPT_vect)
     else
     {
         low_pulses = pulses;
+        logger_printf("%d %d\n", high_pulses, low_pulses);
 
         // We always end on a low pulse, so process high-low-pair
         if (is_listening)
@@ -94,14 +95,15 @@ ISR (TIMER1_CAPT_vect)
                 {
                     // Don't overrun the reading buffer
                     // Don't receive any more data, stop listening
-                    if (tentative_head == tail)
+                    if (head != tail && tentative_head == tail)
                     {
+                        logger_print("stopping...\n");
                         is_listening = false;
                         return;
                     }
                     buffer[tentative_head] = curr_byte;
                     checksum ^= curr_byte;
-                    //logger_printf("byte rcvd: %d\n", curr_byte);
+                    logger_printf("byte rcvd: %d\n", curr_byte);
                     curr_bit = 0;
                     tentative_head = (tentative_head + 1) % BUFFER_SIZE;
                 }

@@ -24,7 +24,7 @@ void pwm_init()
 
 int main()
 {
-    pwm_init();
+    //pwm_init();
     radio_init_rv();
     logger_init();
 
@@ -36,13 +36,13 @@ int main()
         radio_receive(to_receive, 2);
         logger_printf("rcv: %d %d\n", to_receive[0], to_receive[1]);
         
-        float brightness = ((MIN_BRIGHTNESS - 1) / 255) * to_receive[0] + 1;
+        /*float brightness = ((MIN_BRIGHTNESS - 1) / 255) * to_receive[0] + 1;
         uint8_t hue = to_receive[1];
         uint8_t cold = (hue <= 128) ? 255 : (255 - 2 * (hue + 127));
         uint8_t warm = (hue >= 128) ? 255 : 2 * hue;
 
         OCR2A = cold * brightness;
-        OCR2B = warm * brightness;
+        OCR2B = warm * brightness;*/
     }
 
     return 0;

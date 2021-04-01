@@ -2,7 +2,7 @@
 #define PULSE_US 384
 
 #define START_HIGH  1
-#define START_LOW  31
+#define START_LOW   7
 #define END_HIGH   31
 #define END_LOW     1
 #define ONE_HIGH    1
