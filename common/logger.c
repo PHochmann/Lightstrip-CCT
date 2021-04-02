@@ -7,7 +7,7 @@
 
 void logger_init()
 {
-    // Baud rate: 500000 bps
+    // Baud rate: 500000 bps @ 16 MHz
     UBRR0H = (uint8_t)(3 >> 8);
     UBRR0L = (uint8_t)(3 & 0xFF);
     UCSR0A = (1 << U2X0);                  // Double speed

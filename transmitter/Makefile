@@ -8,12 +8,12 @@ TARGET_ELF  := $(PROJ).elf
 BUILD_DIR   := ./bin
 SRC_DIRS    := . ../common
 
-FLASH_BAUDRATE := 115200
-LOG_BAUDRATE   := 500000
+FLASH_BAUDRATE := 57600
+LOG_BAUDRATE   := 250000
 
 MCU_AVRDUDE := m328p
 MCU_GCC     := atmega328p
-USB_DEVICE  := /dev/ttyUSB2
+USB_DEVICE  := /dev/ttyUSB3
 
 INC         := /usr/avr/include
 
