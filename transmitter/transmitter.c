@@ -8,8 +8,7 @@
 #include <avr/io.h>
 
 #include "radio_tx.h"
-#include "../common/logger.h"
-#include "../common/protocol.h"
+//#include "../common/logger.h"
 
 // ADC0 = Port C, Pin 0 ANALOG
 // ADC1 = Port C, Pin 1 ANALOG
@@ -37,9 +36,9 @@ int main()
 {
     adc_init();
     radio_init_tx();
-    logger_init();
+    //logger_init();
 
-    logger_print("Transmitter started!\n");
+    //logger_print("Transmitter started!\n");
 
     while (true)
     {

@@ -2,9 +2,8 @@
 #include <stdint.h>
 #include <avr/io.h>
 
-#define RADIO_RV
 #include "radio_rv.h"
-#include "../common/logger.h"
+//#include "../common/logger.h"
 
 // OC2A = Port B, Pin 3 PWM COLD WHITE
 // OC2B = Port D, Pin 3 PWM WARM WHITE
@@ -26,9 +25,9 @@ int main()
 {
     pwm_init();
     radio_init_rv();
-    logger_init();
+    //logger_init();
 
-    logger_print("Receiver started!\n");
+    //logger_print("Receiver started!\n");
 
     while (true)
     {

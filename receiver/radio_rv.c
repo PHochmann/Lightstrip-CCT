@@ -4,7 +4,7 @@
 
 #include "radio_rv.h"
 #include "../common/protocol.h"
-#include "../common/logger.h"
+//#include "../common/logger.h"
 
 /*
 Timer/Counter 1 is used to capture input at Pin B0
@@ -66,7 +66,15 @@ ISR (TIMER1_CAPT_vect)
                 // XOR over all bytes must be 0
                 if (checksum == 0)
                 {
-                    head = (tentative_head - 1) % BUFFER_SIZE;
+                    // -1 % 100 = -1 and not 99 :(
+                    if (tentative_head == 0)
+                    {
+                        head = BUFFER_SIZE - 1;
+                    }
+                    else
+                    {
+                        head = (tentative_head - 1) % BUFFER_SIZE;
+                    }
                 }
                 return;
             }
