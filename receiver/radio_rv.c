@@ -52,7 +52,7 @@ ISR (TIMER1_CAPT_vect)
     else
     {
         low_pulses = pulses;
-        logger_printf("%d %d\n", high_pulses, low_pulses);
+        //logger_printf("%d %d\n", high_pulses, low_pulses);
 
         // We always end on a low pulse, so process high-low-pair
         if (is_listening)
@@ -97,13 +97,13 @@ ISR (TIMER1_CAPT_vect)
                     // Don't receive any more data, stop listening
                     if (head != tail && tentative_head == tail)
                     {
-                        logger_print("stopping...\n");
+                        //logger_print("stopping...\n");
                         is_listening = false;
                         return;
                     }
                     buffer[tentative_head] = curr_byte;
                     checksum ^= curr_byte;
-                    logger_printf("byte rcvd: %d\n", curr_byte);
+                    //logger_printf("byte rcvd: %d\n", curr_byte);
                     curr_bit = 0;
                     tentative_head = (tentative_head + 1) % BUFFER_SIZE;
                 }

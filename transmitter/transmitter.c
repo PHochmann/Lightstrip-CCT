@@ -43,11 +43,10 @@ int main()
 
     while (true)
     {
-        //uint8_t to_send[] = { get_adc_value(0), get_adc_value(1) };
-        uint8_t to_send[] = { 69, 42 };
-        logger_printf("tx: %d %d\n", to_send[0], to_send[1]);
+        uint8_t to_send[] = { get_adc_value(0), get_adc_value(1) };
+        //logger_printf("tx: %d %d\n", to_send[0], to_send[1]);
         radio_send(to_send, 2);
-        _delay_ms(500);
+        _delay_ms(10);
     }
 
     return 0;
