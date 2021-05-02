@@ -3,7 +3,7 @@
 # 57600
 # 115200
 
-PROJ        := lightstrip-mcu
+PROJ        := lightstrip-cct-transmitter
 TARGET_ELF  := $(PROJ).elf
 BUILD_DIR   := ./bin
 SRC_DIRS    := . ../common
@@ -30,7 +30,7 @@ CFLAGS      := \
 	-Wextra \
 	-Werror
 
-SRCS := $(shell find $(SRC_DIRS) -name "*.c" -o -name "*.S")
+SRCS := $(shell find $(SRC_DIRS) -name "*.c")
 
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
@@ -38,7 +38,7 @@ DEPS := $(OBJS:.o=.d)
 all: $(BUILD_DIR)/$(TARGET_ELF)
 	avr-size --mcu=$(MCU_GCC) -C $(BUILD_DIR)/$(TARGET_ELF)
 
-flash: $(BUILD_DIR)/$(TARGET_ELF)
+flash: all
 	avr-objcopy -O ihex $(BUILD_DIR)/$(TARGET_ELF) $(BUILD_DIR)/$(PROJ).hex
 	avrdude -v -p $(MCU_AVRDUDE) -c arduino -P $(USB_DEVICE) -b $(FLASH_BAUDRATE) -D -U flash:w:$(BUILD_DIR)/$(PROJ).hex:i
 
@@ -46,18 +46,13 @@ debug: flash
 	python ../Logger.py $(USB_DEVICE) $(LOG_BAUDRATE)
 
 $(BUILD_DIR)/$(TARGET_ELF): $(OBJS)
-	@$(CC) -mmcu=$(MCU_GCC) $(OBJS) -o $@ $(LDFLAGS)
+	@$(CC) -mmcu=$(MCU_GCC) $(subst ../,,$(OBJS)) -o $@ $(LDFLAGS)
 	@echo Done. Placed elf at $(BUILD_DIR)/$(TARGET_ELF)
 
 $(BUILD_DIR)/%.c.o: %.c
-	@mkdir -p $(dir $@)
+	@mkdir -p $(dir $(subst ../,,$@))
 	@echo Compiling $<
-	@$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD_DIR)/%.S.o: %.S
-	@mkdir -p $(dir $@)
-	@echo Compiling $<
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $(subst ../,,$@)
 
 .PHONY: clean
 clean:
