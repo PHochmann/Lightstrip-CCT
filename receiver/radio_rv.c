@@ -94,6 +94,8 @@ ISR (TIMER1_CAPT_vect)
                     else
                     {
                         // High-low-pair not corresponding to anything
+                        // We can end here since transmission will be corrupted anyway
+                        is_listening = false;
                         return;
                     }
                 }
