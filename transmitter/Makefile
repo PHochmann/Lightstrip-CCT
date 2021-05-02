@@ -13,7 +13,7 @@ LOG_BAUDRATE   := 250000
 
 MCU_AVRDUDE := m328p
 MCU_GCC     := atmega328p
-USB_DEVICE  := /dev/ttyUSB3
+USB_DEVICE  := /dev/ttyUSB1
 
 INC         := /usr/avr/include
 

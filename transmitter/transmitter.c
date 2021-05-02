@@ -8,10 +8,12 @@
 #include <avr/io.h>
 
 #include "radio_tx.h"
-//#include "../common/logger.h"
+#include "../common/logger.h"
 
 // ADC0 = Port C, Pin 0 ANALOG
 // ADC1 = Port C, Pin 1 ANALOG
+
+#define NUM_SAMPLES 10
 
 void adc_init()
 {
@@ -36,14 +38,24 @@ int main()
 {
     adc_init();
     radio_init_tx();
-    //logger_init();
+    logger_init();
 
-    //logger_print("Transmitter started!\n");
+    logger_print("Transmitter started!\n");
 
     while (true)
     {
-        uint8_t to_send[] = { get_adc_value(0), get_adc_value(1) };
-        //logger_printf("tx: %d %d\n", to_send[0], to_send[1]);
+        uint16_t a = 0;
+        uint16_t b = 0;
+        for (size_t i = 0; i < NUM_SAMPLES; i++)
+        {
+            a += get_adc_value(0);
+            b += get_adc_value(1);
+        }
+        a /= NUM_SAMPLES;
+        b /= NUM_SAMPLES;
+
+        uint8_t to_send[] = { 255 - a, b };
+        logger_printf("tx: %d %d\n", to_send[0], to_send[1]);
         radio_send(to_send, 2);
         _delay_ms(10);
     }

@@ -4,7 +4,7 @@
 
 #include "radio_rv.h"
 #include "../common/protocol.h"
-//#include "../common/logger.h"
+#include "../common/logger.h"
 
 /*
 Timer/Counter 1 is used to capture input at Pin B0
@@ -52,7 +52,7 @@ ISR (TIMER1_CAPT_vect)
     else
     {
         low_pulses = pulses;
-        //logger_printf("%d %d\n", high_pulses, low_pulses);
+        logger_printf("%d %d\n", high_pulses, low_pulses);
 
         // We always end on a low pulse, so process high-low-pair
         if (is_listening)
