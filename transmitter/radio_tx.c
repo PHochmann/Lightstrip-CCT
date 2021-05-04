@@ -9,6 +9,9 @@
 
 #define RADIO_TX_PIN 3
 
+#define TX_HIGH ((PORTD & ~(1 << RADIO_TX_PIN)) | (1 << RADIO_TX_PIN))
+#define TX_LOW  ((PORTD & ~(1 << RADIO_TX_PIN)) & ~(1 << RADIO_TX_PIN))
+
 void radio_init_tx()
 {
     DDRD |= (1 << RADIO_TX_PIN);
@@ -21,16 +24,16 @@ void send_byte(uint8_t byte)
     {
         if ((byte & (1 << i)) != 0)
         {
-            PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) | (1 << RADIO_TX_PIN);
+            PORTD = TX_HIGH;
             _delay_us(ONE_HIGH * PULSE_US);
-            PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) & ~(1 << RADIO_TX_PIN);
+            PORTD = TX_LOW;
             _delay_us(ONE_LOW * PULSE_US);
         }
         else
         {
-            PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) | (1 << RADIO_TX_PIN);
+            PORTD = TX_HIGH;
             _delay_us(ZERO_HIGH * PULSE_US);
-            PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) & ~(1 << RADIO_TX_PIN);
+            PORTD = TX_LOW;
             _delay_us(ZERO_LOW * PULSE_US);
         }
     }
@@ -38,9 +41,16 @@ void send_byte(uint8_t byte)
 
 void radio_send(uint8_t *buffer, size_t bytes)
 {
-    PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) | (1 << RADIO_TX_PIN);
+    // End low pulse
+    PORTD = TX_HIGH;
+    _delay_us(PULSE_US * 10);
+    PORTD = TX_LOW;
+    _delay_us(PULSE_US * 10);
+
+    // Send preamble
+    PORTD = TX_HIGH;
     _delay_us(START_HIGH * PULSE_US);
-    PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) & ~(1 << RADIO_TX_PIN);
+    PORTD = TX_LOW;
     _delay_us(START_LOW * PULSE_US);
 
     uint8_t checksum = 0;
@@ -52,14 +62,15 @@ void radio_send(uint8_t *buffer, size_t bytes)
 
     send_byte(checksum);
 
-    PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) | (1 << RADIO_TX_PIN);
+    // Send stop sequence
+    PORTD = TX_HIGH;
     _delay_us(END_HIGH * PULSE_US);
-    PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) & ~(1 << RADIO_TX_PIN);
+    PORTD = TX_LOW;
     _delay_us(END_LOW * PULSE_US);
 
     // End low pulse
-    PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) | (1 << RADIO_TX_PIN);
+    PORTD = TX_HIGH;
     _delay_us(PULSE_US);
     // Put into low until next transmission
-    PORTD = (PORTD & ~(1 << RADIO_TX_PIN)) & ~(1 << RADIO_TX_PIN);
+    PORTD = TX_LOW;
 }
