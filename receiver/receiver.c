@@ -8,7 +8,8 @@
 // OC2A = Port B, Pin 3 PWM COLD WHITE
 // OC2B = Port D, Pin 3 PWM WARM WHITE
 
-#define MIN_BRIGHTNESS 0.1
+#define START_BRIGHTNESS 0.1
+#define MIN_BRIGHTNESS   0.0
 
 void pwm_init()
 {
@@ -17,8 +18,8 @@ void pwm_init()
     TCCR2B = (0 << WGM22) | (0 << CS22) | (0 << CS21) | (1 << CS20);
     DDRD |= (1 << 3);
     DDRB |= (1 << 3);
-    OCR2A = MIN_BRIGHTNESS * 255;
-    OCR2B = MIN_BRIGHTNESS * 255;
+    OCR2A = START_BRIGHTNESS * 255;
+    OCR2B = START_BRIGHTNESS * 255;
 }
 
 int main()
@@ -35,7 +36,7 @@ int main()
         radio_receive(to_receive, 2);
         //logger_printf("rcv: %d %d\n", to_receive[0], to_receive[1]);
         
-        float brightness = ((MIN_BRIGHTNESS - 1) / 255) * to_receive[0] + 1;
+        float brightness = ((1 - MIN_BRIGHTNESS) / 255) * to_receive[0];
         uint8_t hue = to_receive[1];
         uint8_t cold = (hue <= 128) ? 255 : (255 - 2 * (hue + 127));
         uint8_t warm = (hue >= 128) ? 255 : 2 * hue;

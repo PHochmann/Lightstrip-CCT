@@ -10,10 +10,11 @@ SRC_DIRS    := . ../common
 
 FLASH_BAUDRATE := 115200
 LOG_BAUDRATE   := 500000
+F_CPU          := 16000000L
 
 MCU_AVRDUDE    := m328p
 MCU_GCC        := atmega328p
-USB_DEVICE     := /dev/ttyUSB1
+USB_DEVICE     := /dev/ttyUSB2
 
 INC         := /usr/avr/include
 
@@ -24,6 +25,7 @@ CFLAGS      := \
 	-MMD \
 	-MP \
 	-std=gnu99 \
+	-DF_CPU=$(F_CPU) \
 	$(addprefix -I,$(INC)) \
 	-mmcu=$(MCU_GCC) \
 	-Wall \

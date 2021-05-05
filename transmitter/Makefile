@@ -10,6 +10,7 @@ SRC_DIRS    := . ../common
 
 FLASH_BAUDRATE := 57600
 LOG_BAUDRATE   := 250000
+F_CPU          := 8000000L
 
 MCU_AVRDUDE := m328p
 MCU_GCC     := atmega328p
@@ -24,6 +25,7 @@ CFLAGS      := \
 	-MMD \
 	-MP \
 	-std=gnu99 \
+	-DF_CPU=$(F_CPU) \
 	$(addprefix -I,$(INC)) \
 	-mmcu=$(MCU_GCC) \
 	-Wall \

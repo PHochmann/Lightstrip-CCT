@@ -10,7 +10,6 @@
 Timer/Counter 1 is used to capture input at Pin B0
 */
 
-#define F_CPU 16000000
 #define PRESCALER 1024
 #define TICKS_PER_PULSE ((F_CPU / PRESCALER) / (1000000 / PULSE_US)) // 6
 #define BUFFER_SIZE 100

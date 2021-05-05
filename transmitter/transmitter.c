@@ -1,4 +1,3 @@
-#define F_CPU 16000000L
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -13,6 +12,8 @@
 // ADC1 = Port C, Pin 1 ANALOG
 
 #define NUM_SAMPLES 32
+#define SOCKET_OFF   5
+#define SOCKET_ON   10
 
 void adc_init()
 {
@@ -38,19 +39,37 @@ int main()
     adc_init();
     radio_init_tx();
 
+    uint16_t a = 0;
+    uint16_t b = 0;
+
     while (true)
     {
-        uint16_t a = 0;
-        uint16_t b = 0;
+        uint16_t new_a = 0;
+        uint16_t new_b = 0;
         for (size_t i = 0; i < NUM_SAMPLES; i++)
         {
-            a += get_adc_value(0);
-            b += get_adc_value(1);
+            new_a += get_adc_value(0);
+            new_b += get_adc_value(1);
         }
-        a /= NUM_SAMPLES;
-        b /= NUM_SAMPLES;
+        new_a /= NUM_SAMPLES;
+        new_b /= NUM_SAMPLES;
 
-        uint8_t to_send[] = { 255 - a, b };
+        if (new_a <= SOCKET_OFF && a > SOCKET_OFF)
+        {
+            radio_socket_off();
+        }
+        else
+        {
+            if (new_a >= SOCKET_ON && a < SOCKET_ON)
+            {
+                radio_socket_on();
+            }
+        }
+
+        a = new_a;
+        b = new_b;
+
+        uint8_t to_send[] = { a, b };
         radio_send(to_send, 2);
     }
 
