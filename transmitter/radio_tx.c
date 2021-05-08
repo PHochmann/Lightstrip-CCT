@@ -86,15 +86,10 @@ void radio_send(uint8_t *buffer, size_t bytes)
 #define SOCKET_NUM_REPEATS     5
 
 // GT-FSI-07 Group 4 switching codes
-uint8_t on[] = {
- 0b00000110, 0b01001101, 0b01101000
-};
+const uint32_t  on = 0b000001100100110101101000;
+const uint32_t off = 0b000010101011000000011000;
 
-uint8_t off[] = {
-    0b00001010, 0b10110000, 0b00011000
-};
-
-void socket_send(uint8_t *buffer)
+void socket_send(uint32_t code)
 {
     for (size_t repeat = 0; repeat < SOCKET_NUM_REPEATS; repeat++)
     {
@@ -103,24 +98,21 @@ void socket_send(uint8_t *buffer)
         PORTD = TX_LOW;
         _delay_us(SOCKET_START_LOW * SOCKET_PULSE_US);
 
-        for (size_t i = 0; i < SOCKET_PAYLOAD_LENGTH / 8; i++)
+        for (size_t j = 0; j < SOCKET_PAYLOAD_LENGTH; j++)
         {
-            for (size_t j = 0; j < 8; j++)
+            if ((code & (1 << (7 - j))) != 0)
             {
-                if ((buffer[i] & (1 << (7 - j))) != 0)
-                {
-                    PORTD = TX_HIGH;
-                    _delay_us(SOCKET_ONE_HIGH * SOCKET_PULSE_US);
-                    PORTD = TX_LOW;
-                    _delay_us(SOCKET_ONE_LOW * SOCKET_PULSE_US);
-                }
-                else
-                {
-                    PORTD = TX_HIGH;
-                    _delay_us(SOCKET_ZERO_HIGH * SOCKET_PULSE_US);
-                    PORTD = TX_LOW;
-                    _delay_us(SOCKET_ZERO_LOW * SOCKET_PULSE_US);
-                }
+                PORTD = TX_HIGH;
+                _delay_us(SOCKET_ONE_HIGH * SOCKET_PULSE_US);
+                PORTD = TX_LOW;
+                _delay_us(SOCKET_ONE_LOW * SOCKET_PULSE_US);
+            }
+            else
+            {
+                PORTD = TX_HIGH;
+                _delay_us(SOCKET_ZERO_HIGH * SOCKET_PULSE_US);
+                PORTD = TX_LOW;
+                _delay_us(SOCKET_ZERO_LOW * SOCKET_PULSE_US);
             }
         }
     }

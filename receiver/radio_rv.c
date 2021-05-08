@@ -63,7 +63,8 @@ ISR (TIMER1_CAPT_vect)
 
                 // Bitwise even parity
                 // XOR over all bytes must be 0
-                if (checksum == 0)
+                // Also, if we didn't receive the last byte completely some bits were lost
+                if (checksum == 0 && curr_bit == 0)
                 {
                     // -1 % 100 = -1 and not 99 :(
                     if (tentative_head == 0)
