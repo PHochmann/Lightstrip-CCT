@@ -100,7 +100,8 @@ void socket_send(uint32_t code)
 
         for (size_t j = 0; j < SOCKET_PAYLOAD_LENGTH; j++)
         {
-            if ((code & (1 << (7 - j))) != 0)
+            // Send MSB first
+            if ((code & (1 << (SOCKET_PAYLOAD_LENGTH - 1 - j))) != 0)
             {
                 PORTD = TX_HIGH;
                 _delay_us(SOCKET_ONE_HIGH * SOCKET_PULSE_US);
