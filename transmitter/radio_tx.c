@@ -86,8 +86,8 @@ void radio_send(uint8_t *buffer, size_t bytes)
 #define SOCKET_NUM_REPEATS     5
 
 // GT-FSI-07 Group 4 switching codes
-const uint32_t  on = 0b000001100100110101101000;
-const uint32_t off = 0b000010101011000000011000;
+const uint32_t  on = 0b000101101011001001100000;
+const uint32_t off = 0b000110000000110101010000;
 
 void socket_send(uint32_t code)
 {
@@ -100,8 +100,8 @@ void socket_send(uint32_t code)
 
         for (size_t j = 0; j < SOCKET_PAYLOAD_LENGTH; j++)
         {
-            // Send MSB first
-            if ((code & (1 << (SOCKET_PAYLOAD_LENGTH - 1 - j))) != 0)
+            // Send LSB first
+            if ((code & (1 << j)) != 0)
             {
                 PORTD = TX_HIGH;
                 _delay_us(SOCKET_ONE_HIGH * SOCKET_PULSE_US);

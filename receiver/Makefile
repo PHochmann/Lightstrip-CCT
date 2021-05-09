@@ -14,7 +14,7 @@ F_CPU          := 16000000L
 
 MCU_AVRDUDE    := m328p
 MCU_GCC        := atmega328p
-USB_DEVICE     := /dev/ttyUSB2
+USB_DEVICE     := /dev/ttyUSB0
 
 INC         := /usr/avr/include
 
