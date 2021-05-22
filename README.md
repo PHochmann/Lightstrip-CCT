@@ -8,4 +8,4 @@ Drives two MOSFETs to control the cold white and warm white LEDs of a CCT Lights
 ## Transmitter
 Arduino Pro Mini that sends input from two potentiometers via 433 MHz to receiver.
 Left pot controls brightness, right pot controls color temperature.
-Additionally switches a 433 MHz RC plug on and off based on a treshold on the brightness.
+Additionally switches a 433 MHz RC plug on and off based on a threshold on the brightness.
