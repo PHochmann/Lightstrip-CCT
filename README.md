@@ -1,5 +1,6 @@
 # Lightstrip-CCT
-Arduino Nano firmware to dim 12V CCT LED strip with cold white and warm white LEDs using a 433 MHz remote
+Arduino Nano firmware to dim 12V CCT LED strip with cold white and warm white LEDs using a 433 MHz remote.
+See it in action: https://youtu.be/5DZkxjjYW6k
 
 ## Receiver
 Arduino Nano that receives 433 MHz signals from remote.
